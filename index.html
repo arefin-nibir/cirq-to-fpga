@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cirq-Vivado Integration Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .step {
+            background: #f8f9fa;
+            border-left: 5px solid #667eea;
+            padding: 30px;
+            margin-bottom: 30px;
+            border-radius: 10px;
+            transition: transform 0.3s;
+        }
+        
+        .step:hover {
+            transform: translateX(10px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .step-number {
+            background: #667eea;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-right: 20px;
+            float: left;
+        }
+        
+        .step-title {
+            font-size: 1.8em;
+            color: #333;
+            margin-bottom: 15px;
+            margin-left: 70px;
+        }
+        
+        .step-content {
+            margin-left: 70px;
+            color: #555;
+            line-height: 1.6;
+        }
+        
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+        }
+        
+        .highlight {
+            background: #fff3cd;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        
+        .warning {
+            background: #fff3cd;
+            border-left: 5px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        
+        .success {
+            background: #d4edda;
+            border-left: 5px solid #28a745;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        
+        .info {
+            background: #d1ecf1;
+            border-left: 5px solid #17a2b8;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        
+        .flow-diagram {
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            padding: 30px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .flow-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 10px auto;
+            max-width: 500px;
+            font-weight: bold;
+        }
+        
+        .arrow {
+            font-size: 2em;
+            color: #667eea;
+            margin: 10px 0;
+        }
+        
+        .button {
+            background: #667eea;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-block;
+            text-decoration: none;
+            margin: 10px 5px;
+        }
+        
+        .button:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        ul {
+            margin-left: 20px;
+        }
+        
+        li {
+            margin: 10px 0;
+        }
+        
+        .footer {
+            background: #2d2d2d;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔬 Cirq to Vivado Integration</h1>
+            <p>Complete Beginner's Guide for Quantum FPGA Simulation</p>
+        </div>
+        
+        <div class="content">
+            <div class="info">
+                <strong>📌 What You'll Learn:</strong>
+                <ul>
+                    <li>Create quantum circuits in Cirq (Python)</li>
+                    <li>Simulate them in Vivado (FPGA software)</li>
+                    <li>Verify results automatically</li>
+                    <li>Understand hardware implementation</li>
+                </ul>
+            </div>
+            
+            <div class="flow-diagram">
+                <h2>Overall Workflow</h2>
+                <div class="flow-box">1. Design Circuit in Cirq (Python)</div>
+                <div class="arrow">↓</div>
+                <div class="flow-box">2. Convert to Verilog (Automated Script)</div>
+                <div class="arrow">↓</div>
+                <div class="flow-box">3. Simulate in Vivado (FPGA)</div>
+                <div class="arrow">↓</div>
+                <div class="flow-box">4. Verify Results (Automatic Checking)</div>
+            </div>
+            
+            <!-- Step 1 -->
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-title">Install Python & Cirq</div>
+                <div class="step-content">
+                    <p>First, install the required Python packages:</p>
+                    <div class="code-block">pip install cirq numpy matplotlib</div>
+                    
+                    <p>Verify installation:</p>
+                    <div class="code-block">python -c "import cirq; print('Cirq version:', cirq.__version__)"</div>
+                    
+                    <div class="success">
+                        ✅ <strong>Success:</strong> You should see "Cirq version: X.X.X"
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Step 2 -->
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-title">Setup Vivado Project</div>
+                <div class="step-content">
+                    <p>Open Vivado and create a new project:</p>
+                    <ul>
+                        <li>Click <span class="highlight">Create Project</span></li>
+                        <li>Project name: <span class="highlight">quantum_fpga_test</span></li>
+                        <li>Type: <span class="highlight">RTL Project</span></li>
+                        <li>Part: <span class="highlight">xc7z020clg400-1</span> (or any)</li>
+                    </ul>
+                    
+                    <div class="warning">
+                        ⚠️ <strong>Note:</strong> For simulation only, the specific FPGA part doesn't matter much. Choose any available.
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Step 3 -->
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-title">Run Python Workflow Script</div>
+                <div class="step-content">
+                    <p>Save the complete workflow script and run it:</p>
+                    <div class="code-block">python complete_workflow.py</div>
+                    
+                    <p>Choose option <span class="highlight">1</span> for Interactive Mode, then:</p>
+                    <ul>
+                        <li>Enter a project name (or press Enter)</li>
+                        <li>Select a circuit type (1-4)</li>
+                        <li>Wait for file generation</li>
+                    </ul>
+                    
+                    <div class="success">
+                        ✅ <strong>Result:</strong> You'll get a folder with all necessary files!
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Step 4 -->
+            <div class="step">
+                <div class="step-number">4</div>
+                <div class="step-title">Add Files to Vivado</div>
+                <div class="step-content">
+                    <p>In Vivado, add the generated files:</p>
+                    
+                    <h4>Add Design Sources:</h4>
+                    <ul>
+                        <li>Click <span class="highlight">Add Sources</span> (or press Alt+A)</li>
+                        <li>Select "Add or create design sources"</li>
+                        <li>Add file: <span class="highlight">rtl/quantum_gate_core.v</span></li>
+                    </ul>
+                    
+                    <h4>Add Simulation Sources:</h4>
+                    <ul>
+                        <li>Click <span class="highlight">Add Sources</span> again</li>
+                        <li>Select "Add or create simulation sources"</li>
+                        <li>Add file: <span class="highlight">tb/your_circuit_tb.v</span></li>
+                        <li>Right-click the testbench → <span class="highlight">Set as Top</span></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Step 5 -->
+            <div class="step">
+                <div class="step-number">5</div>
+                <div class="step-title">Run Simulation</div>
+                <div class="step-content">
+                    <p>Now simulate your quantum circuit on the FPGA:</p>
+                    <ul>
+                        <li>In Flow Navigator, click <span class="highlight">Run Simulation</span></li>
+                        <li>Select <span class="highlight">Run Behavioral Simulation</span></li>
+                        <li>Wait for compilation (30 seconds - 2 minutes)</li>
+                    </ul>
+                    
+                    <div class="info">
+                        💡 <strong>Tip:</strong> First simulation takes longer. Subsequent runs are faster!
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Step 6 -->
+            <div class="step">
+                <div class="step-number">6</div>
+                <div class="step-title">Check Results</div>
+                <div class="step-content">
+                    <p>Look at the <span class="highlight">Tcl Console</span> (bottom of Vivado window):</p>
+                    
+                    <div class="code-block">
+Gate 1: H
+  ✓ PASS
+Gate 2: X
+  ✓ PASS
+Gate 3: Ry(π/4)
+  ✓ PASS
+
+========================================
+  RESULTS: 3 passed, 0 failed
+  *** ALL TESTS PASSED! ***
+========================================
+                    </div>
+                    
+                    <div class="success">
+                        ✅ <strong>Success!</strong> All gates passed verification. Your FPGA simulation matches Cirq!
+                    </div>
+                    
+                    <h4>View Waveforms:</h4>
+                    <ul>
+                        <li>The simulation window shows signal waveforms</li>
+                        <li>Right-click signals → <span class="highlight">Add to Wave Window</span></li>
+                        <li>Click <span class="highlight">Zoom Fit</span> to see everything</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Troubleshooting -->
+            <div class="step">
+                <div class="step-number">💡</div>
+                <div class="step-title">Troubleshooting</div>
+                <div class="step-content">
+                    <h4>Problem: "Module not found" error</h4>
+                    <p><strong>Solution:</strong> Make sure quantum_gate_core.v is added to Design Sources</p>
+                    
+                    <h4>Problem: Tests fail</h4>
+                    <p><strong>Solution:</strong> This is normal for fixed-point arithmetic. Small errors are acceptable if within tolerance.</p>
+                    
+                    <h4>Problem: Simulation hangs</h4>
+                    <p><strong>Solution:</strong> Click Stop, then restart. Check that clock is toggling.</p>
+                    
+                    <h4>Problem: Python encoding error</h4>
+                    <p><strong>Solution:</strong> Add to top of Python script:</p>
+                    <div class="code-block"># -*- coding: utf-8 -*-
+import sys
+sys.stdout.reconfigure(encoding='utf-8')</div>
+                </div>
+            </div>
+            
+            <!-- Next Steps -->
+            <div class="step">
+                <div class="step-number">🚀</div>
+                <div class="step-title">Next Steps</div>
+                <div class="step-content">
+                    <h4>Once you master the basics:</h4>
+                    <ul>
+                        <li><strong>Try different circuits:</strong> Create your own quantum algorithms</li>
+                        <li><strong>Add more qubits:</strong> Extend the hardware for 2-3 qubits</li>
+                        <li><strong>Implement CNOT:</strong> Add two-qubit gates</li>
+                        <li><strong>Get FPGA hardware:</strong> Test on real PYNQ board (~$200)</li>
+                        <li><strong>Optimize design:</strong> Improve performance and resource usage</li>
+                    </ul>
+                    
+                    <div class="info">
+                        📚 <strong>Learning Resources:</strong>
+                        <ul>
+                            <li>Cirq Tutorials: quantumai.google/cirq</li>
+                            <li>Vivado Simulation Guide: xilinx.com</li>
+                            <li>Quantum Computing Basics: qiskit.org/textbook</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Reference -->
+            <div class="step">
+                <div class="step-number">📋</div>
+                <div class="step-title">Quick Reference</div>
+                <div class="step-content">
+                    <h4>Common Quantum Gates in Cirq:</h4>
+                    <div class="code-block">import cirq
+import numpy as np
+
+q = cirq.LineQubit(0)
+
+# Single-qubit gates
+cirq.H(q)              # Hadamard gate
+cirq.X(q)              # Pauli-X (NOT gate)
+cirq.Y(q)              # Pauli-Y gate
+cirq.Z(q)              # Pauli-Z gate
+cirq.S(q)              # S gate (phase gate)
+cirq.T(q)              # T gate
+
+# Rotation gates
+cirq.Rx(angle)(q)      # Rotation around X-axis
+cirq.Ry(angle)(q)      # Rotation around Y-axis
+cirq.Rz(angle)(q)      # Rotation around Z-axis
+
+# Example angles
+np.pi/2    # 90 degrees
+np.pi/4    # 45 degrees
+np.pi      # 180 degrees</div>
+
+                    <h4>File Structure:</h4>
+                    <div class="code-block">my_quantum_project/
+├── rtl/
+│   └── quantum_gate_core.v      # FPGA hardware design
+├── tb/
+│   └── circuit_name_tb.v        # Auto-generated testbench
+├── scripts/
+│   └── run_sim.tcl              # Vivado automation script
+├── circuits/
+│   ├── circuit_name.txt         # Circuit description
+│   └── circuit_name.json        # Circuit metadata
+└── README.md                     # Complete documentation</div>
+
+                    <h4>Vivado Keyboard Shortcuts:</h4>
+                    <ul>
+                        <li><strong>Alt+A:</strong> Add Sources</li>
+                        <li><strong>F3:</strong> Run Simulation</li>
+                        <li><strong>Ctrl+D:</strong> Add to Wave Window</li>
+                        <li><strong>Shift+F:</strong> Zoom Fit</li>
+                        <li><strong>Ctrl+/:</strong> Zoom In/Out</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Example: Creating Your First Circuit -->
+            <div class="step">
+                <div class="step-number">🎯</div>
+                <div class="step-title">Example: Your First Circuit</div>
+                <div class="step-content">
+                    <p>Let's create a simple quantum circuit step by step:</p>
+                    
+                    <h4>Step 1: Write Python Code</h4>
+                    <div class="code-block"># my_first_quantum_circuit.py
+import cirq
+import numpy as np
+
+# Create a qubit
+q = cirq.LineQubit(0)
+
+# Build circuit: Hadamard → X gate → Y rotation
+circuit = cirq.Circuit([
+    cirq.H(q),              # Put qubit in superposition
+    cirq.X(q),              # Flip the qubit
+    cirq.Ry(np.pi/4)(q)     # Rotate by 45 degrees
+])
+
+print("My Quantum Circuit:")
+print(circuit)
+
+# Simulate in Cirq
+simulator = cirq.Simulator()
+result = simulator.simulate(circuit)
+print("\nFinal state vector:")
+print(result.final_state_vector)</div>
+
+                    <h4>Step 2: Generate FPGA Files</h4>
+                    <div class="code-block"># Use the workflow script
+from complete_workflow import QuantumFPGAWorkflow
+
+workflow = QuantumFPGAWorkflow("my_first_fpga")
+workflow.setup_project()
+workflow.save_circuit(circuit, "my_circuit")
+workflow.generate_all_files(circuit, "my_circuit")</div>
+
+                    <h4>Step 3: Test in Vivado</h4>
+                    <p>Follow steps 2-6 from the main guide above!</p>
+                    
+                    <div class="success">
+                        🎉 <strong>Congratulations!</strong> You just simulated a quantum circuit on FPGA hardware!
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Understanding Results -->
+            <div class="step">
+                <div class="step-number">🔍</div>
+                <div class="step-title">Understanding the Results</div>
+                <div class="step-content">
+                    <h4>What does the simulation tell you?</h4>
+                    
+                    <p><strong>State Vector:</strong> The quantum state is represented as:</p>
+                    <div class="code-block">|ψ⟩ = α|0⟩ + β|1⟩
+
+Where:
+- α = amplitude of |0⟩ state (complex number)
+- β = amplitude of |1⟩ state (complex number)
+- |α|² + |β|² = 1 (probabilities sum to 1)</div>
+
+                    <p><strong>Example Output:</strong></p>
+                    <div class="code-block">Gate 1: H
+  |0⟩ amplitude: 0.7071+0.0000i
+  |1⟩ amplitude: 0.7071+0.0000i
+  ✓ PASS</div>
+                    
+                    <p>This means:</p>
+                    <ul>
+                        <li>50% probability of measuring |0⟩ (0.7071² ≈ 0.5)</li>
+                        <li>50% probability of measuring |1⟩ (0.7071² ≈ 0.5)</li>
+                        <li>The qubit is in equal superposition</li>
+                    </ul>
+                    
+                    <h4>Why Fixed-Point?</h4>
+                    <p>FPGAs work with integers, not floating-point by default. We use <strong>16.16 fixed-point</strong>:</p>
+                    <ul>
+                        <li>16 bits for integer part (-32768 to +32767)</li>
+                        <li>16 bits for fractional part (precision ~0.000015)</li>
+                        <li>Good enough for quantum simulations!</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Comparison Table -->
+            <div class="step">
+                <div class="step-number">⚖️</div>
+                <div class="step-title">Cirq vs Vivado Comparison</div>
+                <div class="step-content">
+                    <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                        <thead>
+                            <tr style="background: #667eea; color: white;">
+                                <th style="padding: 15px; border: 1px solid #ddd;">Aspect</th>
+                                <th style="padding: 15px; border: 1px solid #ddd;">Cirq (Software)</th>
+                                <th style="padding: 15px; border: 1px solid #ddd;">Vivado (FPGA)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="padding: 15px; border: 1px solid #ddd;"><strong>Speed</strong></td>
+                                <td style="padding: 15px; border: 1px solid #ddd;">Fast for small circuits</td>
+                                <td style="padding: 15px; border: 1px solid #ddd;">Very fast (parallel hardware)</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 15px; border: 1px solid #ddd;"><strong>Precision</strong></td>
+                                <td style="padding: 15px; border: 1px solid #ddd;">Double precision (64-bit)</td>
+                                <td style="padding: 15px; border: 1px solid #ddd;">Fixed-point (32-bit)</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 15px; border: 1px solid #ddd;"><strong>Flexibility</strong></td>
+                                <td style="padding: 15px; border: 1px solid #ddd;">Easy to modify</td>
+                                <td style="padding: 15px; border: 1px solid #ddd;">Requires resynthesis</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 15px; border: 1px solid #ddd;"><strong>Power</strong></td>
+                                <td style="padding: 15px; border: 1px solid #ddd;">High (CPU/GPU)</td>
+                                <td style="padding: 15px; border: 1px solid #ddd;">Low (efficient hardware)</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 15px; border: 1px solid #ddd;"><strong>Cost</strong></td>
+                                <td style="padding: 15px; border: 1px solid #ddd;">Free (software only)</td>
+                                <td style="padding: 15px; border: 1px solid #ddd;">$200-$2000 (hardware)</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 15px; border: 1px solid #ddd;"><strong>Best For</strong></td>
+                                <td style="padding: 15px; border: 1px solid #ddd;">Algorithm development</td>
+                                <td style="padding: 15px; border: 1px solid #ddd;">Hardware acceleration</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div class="info">
+                        💡 <strong>When to use each:</strong>
+                        <ul>
+                            <li><strong>Use Cirq:</strong> Developing algorithms, testing ideas, education</li>
+                            <li><strong>Use FPGA:</strong> Production systems, real-time processing, low power</li>
+                            <li><strong>Use Both:</strong> Develop in Cirq, deploy on FPGA! (This tutorial!)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Advanced Topics Preview -->
+            <div class="step">
+                <div class="step-number">🎓</div>
+                <div class="step-title">Advanced Topics (Next Level)</div>
+                <div class="step-content">
+                    <h4>Once you're comfortable with basics:</h4>
+                    
+                    <h4>1. Multi-Qubit Operations</h4>
+                    <p>Implement CNOT and other two-qubit gates:</p>
+                    <div class="code-block"># Cirq code
+q0, q1 = cirq.LineQubit.range(2)
+circuit = cirq.Circuit([
+    cirq.H(q0),
+    cirq.CNOT(q0, q1)  # Entanglement!
+])
+
+# Creates Bell State: (|00⟩ + |11⟩)/√2</div>
+
+                    <h4>2. Real FPGA Deployment</h4>
+                    <ul>
+                        <li>Get a PYNQ-Z2 board (~$200)</li>
+                        <li>Load your design onto real hardware</li>
+                        <li>Control from Python via Ethernet</li>
+                        <li>Run real-time quantum simulations</li>
+                    </ul>
+                    
+                    <h4>3. Optimization Techniques</h4>
+                    <ul>
+                        <li><strong>Pipelining:</strong> Process multiple gates simultaneously</li>
+                        <li><strong>Parallel Processing:</strong> Multiple quantum gates in parallel</li>
+                        <li><strong>Memory Optimization:</strong> Efficient state vector storage</li>
+                        <li><strong>DSP Utilization:</strong> Use FPGA DSP blocks for arithmetic</li>
+                    </ul>
+                    
+                    <h4>4. Integration with Quantum Algorithms</h4>
+                    <ul>
+                        <li>Variational Quantum Eigensolver (VQE)</li>
+                        <li>Quantum Approximate Optimization Algorithm (QAOA)</li>
+                        <li>Grover's Search Algorithm</li>
+                        <li>Quantum Fourier Transform</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Success Checklist -->
+            <div class="step" style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); border-left-color: #28a745;">
+                <div class="step-number" style="background: #28a745;">✓</div>
+                <div class="step-title">Success Checklist</div>
+                <div class="step-content">
+                    <p>You've successfully completed the tutorial when you can:</p>
+                    <ul>
+                        <li>☐ Create a quantum circuit in Cirq</li>
+                        <li>☐ Run the workflow automation script</li>
+                        <li>☐ Open Vivado and add the generated files</li>
+                        <li>☐ Run behavioral simulation</li>
+                        <li>☐ See "ALL TESTS PASSED" in console</li>
+                        <li>☐ View and understand the waveforms</li>
+                        <li>☐ Explain what the state vector means</li>
+                        <li>☐ Modify the circuit and re-simulate</li>
+                    </ul>
+                    
+                    <div style="text-align: center; margin-top: 30px;">
+                        <h3>🎉 Congratulations!</h3>
+                        <p style="font-size: 1.2em;">You now know how to simulate quantum circuits on FPGA hardware!</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- FAQ -->
+            <div class="step">
+                <div class="step-number">❓</div>
+                <div class="step-title">Frequently Asked Questions</div>
+                <div class="step-content">
+                    <h4>Q: Do I need an actual FPGA board?</h4>
+                    <p><strong>A:</strong> No! This tutorial is 100% software-based. Vivado can simulate FPGA behavior without hardware.</p>
+                    
+                    <h4>Q: How long does simulation take?</h4>
+                    <p><strong>A:</strong> First compilation: 1-2 minutes. Subsequent simulations: 10-30 seconds.</p>
+                    
+                    <h4>Q: Can I simulate multi-qubit circuits?</h4>
+                    <p><strong>A:</strong> Currently the design supports single-qubit gates. You can extend it for 2-3 qubits with modifications.</p>
+                    
+                    <h4>Q: Why use FPGA instead of just Cirq?</h4>
+                    <p><strong>A:</strong> Learning purposes! Understanding hardware implementation helps you:</p>
+                    <ul>
+                        <li>Understand quantum computing at a deeper level</li>
+                        <li>Learn FPGA design skills (valuable in industry)</li>
+                        <li>Prepare for real quantum hardware development</li>
+                        <li>Build custom accelerators</li>
+                    </ul>
+                    
+                    <h4>Q: What if tests fail?</h4>
+                    <p><strong>A:</strong> Small failures are normal due to fixed-point rounding. If differences are tiny (< 0.01), it's acceptable. Large failures indicate bugs.</p>
+                    
+                    <h4>Q: Can I use this for real quantum computers?</h4>
+                    <p><strong>A:</strong> No, this simulates quantum circuits. Real quantum computers use actual qubits (superconducting, trapped ion, etc.). But the algorithms you learn here apply to real quantum computers!</p>
+                    
+                    <h4>Q: Where can I get help?</h4>
+                    <p><strong>A:</strong> Resources:</p>
+                    <ul>
+                        <li>Cirq GitHub Discussions</li>
+                        <li>Xilinx Community Forums</li>
+                        <li>Stack Overflow (tag: cirq, fpga, vivado)</li>
+                        <li>Quantum Computing Stack Exchange</li>
+                    </ul>
+                </div>
+            </div>
+            
+        </div>
+        
+        <div class="footer">
+            <h3>Ready to Start?</h3>
+            <p>Follow the steps above and start your quantum FPGA journey!</p>
+            <p style="margin-top: 20px; opacity: 0.8;">
+                Created for beginners learning quantum computing and FPGA design<br>
+                Happy simulating! 🚀
+            </p>
+        </div>
+    </div>
+</body>
+</html>
